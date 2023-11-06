@@ -1,0 +1,6 @@
+# common pip packages
+matplotlib
+pandas
+tushare
+yfinance
+pydub

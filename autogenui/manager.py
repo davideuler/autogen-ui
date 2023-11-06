@@ -5,7 +5,20 @@
 from typing import Dict
 import autogen
 from .utils import parse_token_usage
-import time
+import os,time
+
+api_keys = [os.environ.get("OPENAI_API_KEY")]
+base_urls = [os.environ.get("OPENAI_API_BASE") or None] # You can specify API base URLs if needed. eg: localhost:8000
+api_type = "openai"  # Type of API, e.g., "openai" or "aoai".
+api_version = ""  # Specify API version if needed.
+
+
+config_list = autogen.get_config_list(
+    api_keys,
+    api_bases=base_urls,
+    api_type=api_type,
+    api_version=api_version
+)
 
 
 class Manager(object):
@@ -15,9 +28,11 @@ class Manager(object):
 
     def run_flow(self, prompt: str, flow: str = "default") -> None:
         autogen.ChatCompletion.start_logging(compact=False)
-        config_list = autogen.config_list_openai_aoai()
+
+        #config_list = autogen.config_list_openai_aoai()
 
         llm_config = {
+            "timeout": 180,
             "seed": 42,  # seed for caching and reproducibility
             "config_list": config_list,  # a list of OpenAI API configurations
             "temperature": 0,  # temperature for sampling
@@ -37,7 +52,8 @@ class Manager(object):
             is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
             code_execution_config={
                 "work_dir": "scratch/coding",
-                "use_docker": False
+                #"use_docker": False
+                "use_docker":"ubuntu-python-runtime:3.10"  # python:3.10
             },
         )
         start_time = time.time()
